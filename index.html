@@ -1,0 +1,40 @@
+<!DOCTYPE html>    
+<html>    
+<head>    
+    <title>Login Form</title>    
+    <link rel="stylesheet" type="text/css" href="style.css">    
+</head>    
+<body>    
+    <h2>Login Page</h2><br>    
+    <div class="login">    
+    <form id="login" onsubmit="submitFunction()" method="GET">    
+        <label><b>User Name     
+        </b>    
+        </label>    
+        <input required type="text" name="user" id="user" placeholder="Username">    
+        <br><br>    
+        <label><b>Password     
+        </b>    
+        </label>    
+        <input required type="Password" name="pass" id="pass" placeholder="Password">    
+        <br><br>
+        <script>
+            var user_val = document.getElementById('user').value;
+            var pass_val = document.getElementById('pass').value;
+        </script>    
+        <div>
+            <button type="submit" id='log'>Submit</button>
+        </div>    
+        <br><br>    
+        <a href="./Sign_up.html">New to this game? Sign Up Now!</a>    
+    </form>
+    <script>
+        function submitFunction(){
+            var action_src = "http://localhost:5000/app/user/" + document.getElementById('user').value + "/" + document.getElementById('pass').value;
+            var your_form = document.getElementById('login');
+            your_form.action = action_src ;
+        }
+    </script>     
+</div>    
+</body>    
+</html>
