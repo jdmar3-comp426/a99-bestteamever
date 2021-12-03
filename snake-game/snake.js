@@ -169,6 +169,7 @@ Snake.Game.prototype.moveSnake = function () {
         if (treatImgs[0]) {
             treatImgs[0].remove();
         }
+        this.drawTreat();
         delete this.treat;
     } else {
         // Remove tail, as treat was not eaten
@@ -246,6 +247,17 @@ Snake.Game.prototype.cellID = function (x, y) {
     return 'cell_' + x + '_' + y;
 };
 
+//https://stackoverflow.com/questions/1484506/random-color-generator
+Snake.Game.prototype.getRandomColor = function () {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+
 Snake.Game.prototype.drawGrid = function () {
     if (this.gridDrawn) {
         return;
@@ -284,6 +296,36 @@ Snake.Game.prototype.drawBox = function () {
     this.boxDrawn = true;
 };
 
+Snake.Game.prototype.drawSnakeBody = function (element) {
+    element.className = 'cell snake snake-body';
+    element.innerHTML = '';
+    element.style['background-color'] = this.getRandomColor();
+}
+
+Snake.Game.prototype.drawSnakeHead = function (element) {
+    element.className = 'cell snake snake-head';
+    element.innerHTML = `<img id="snake-head-img" src="images/snake.png" alt="" style="width: ${this.config.pixelSize}px; height: ${this.config.pixelSize}px">`;
+    element.style['background-color'] = 'transparent';
+
+    var deg = 0;
+    switch (this.state.direction) {
+        case Snake.Direction.Up:
+            deg = 180;
+            break;
+        case Snake.Direction.Right:
+            deg = -90;
+            break;
+        case Snake.Direction.Down:
+            deg = 0;
+            break;
+        case Snake.Direction.Left:
+            deg = 90;
+            break;
+    }
+
+    document.getElementById('snake-head-img').style.transform = 'rotate(' + deg + 'deg)';
+}
+
 Snake.Game.prototype.drawSnake = function () {
     var i = 0,
         id = null,
@@ -301,17 +343,25 @@ Snake.Game.prototype.drawSnake = function () {
         if (!requiredIDs[existing[i].id]) {
             div = this.doc.getElementById(existing[i].id);
             div.className = 'cell';
+            div.innerHTML = '';
+            div.style['background-color'] = 'transparent';
         } else {
             // mark it as not missing
+            this.drawSnakeBody(existing[i]);
             delete requiredIDs[existing[i].id];
         }
     }
     // draw missing cell(s)
+    var isHead = true;
     for (id in requiredIDs) {
         if (requiredIDs.hasOwnProperty(id)) {
             div = this.doc.getElementById(id);
-            div.className = 'cell snake';
-
+            if (isHead) {
+                this.drawSnakeHead(div);
+                isHead = false;
+            } else {
+                this.drawSnakeBody(div);
+            }
         }
     }
 };
@@ -339,11 +389,6 @@ Snake.Game.prototype.drawTreat = function () {
     if (existing[0]) {
         //already drawn
     } else {
-        //remove drawn treats and draw new
-        // const treatImgs = this.doc.getElementsByClassName('treat-img');
-        // if (treatImgs[0]) {
-        //     treatImgs[0].remove();
-        // }
         div = this.doc.getElementById(requiredID);
         div.className = 'cell treat';
         div.innerHTML = `
