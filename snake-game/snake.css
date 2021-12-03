@@ -1,0 +1,15 @@
+#hud {
+	height:100px;
+}
+.cell {
+	position: absolute;
+}
+.box {
+	background-color: black;
+}
+.snake {
+	background-color: green;
+}
+.treat {
+	background-color: transparent;
+}
