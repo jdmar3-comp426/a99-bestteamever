@@ -479,12 +479,14 @@ function createNewGame() {
 }
 
 let startNewGameButton;
-$(() => {
+window.onload = function () {
     startNewGameButton = document.getElementById("new-game-button");
     startNewGameButton.addEventListener("click", createNewGame);
+}
 
 
-})
+
+
 
 
 
