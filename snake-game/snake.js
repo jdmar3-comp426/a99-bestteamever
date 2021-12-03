@@ -90,13 +90,15 @@ Snake.Game = function (doc, wnd) {
     this.boxDrawn = false;
 
     // Force first loop, to make game more responsive at first
+    this.initBox();
+    this.initSnake();
+    this.drawGrid();
+    this.drawBox();
+    this.clearSnake();
     this.loop();
 };
 
 Snake.Game.prototype.initBox = function () {
-    if (this.box) {
-        return;
-    }
     var x = 0, y = 0;
     this.box = [];
     // left
@@ -122,9 +124,6 @@ Snake.Game.prototype.initBox = function () {
 };
 
 Snake.Game.prototype.initSnake = function () {
-    if (this.snake) {
-        return;
-    }
     var i = 0,
         x = Math.floor(this.config.boxSize / 2);
     this.snake = [];
@@ -194,6 +193,10 @@ Snake.Game.prototype.moveSnake = function () {
 Snake.Game.prototype.onGameOver = function () {
     this.state.gameOver = true;
     startNewGameButton.style.display = "block";
+    var button = document.createElement('div');
+    button.innerHTML = `<button id="new-game-button">New Game</button>`;
+    button.addEventListener("click", createNewGame);
+    document.body.appendChild(button);
     return;
 };
 
@@ -223,17 +226,9 @@ Snake.Game.prototype.placeTreat = function () {
 };
 
 Snake.Game.prototype.update = function () {
-    this.initBox();
-    this.initSnake();
-
-    if (this.state.paused) {
+    if (this.state.gameOver || this.state.paused) {
         return;
     }
-
-    if (this.state.gameOver) {
-        return;
-    }
-
     this.placeTreat();
 
     this.moveSnake();
@@ -259,9 +254,18 @@ Snake.Game.prototype.getRandomColor = function () {
 
 
 Snake.Game.prototype.drawGrid = function () {
-    if (this.gridDrawn) {
-        return;
-    }
+    document.body.innerHTML = `
+    <div id="hud">
+        <div>
+            Level: <span id="level">0</span>
+        </div>
+        <div>
+            Score: <span id="score">0</span>
+        </div>
+        <div>
+            <span id="state"></span>
+        </div>
+    </div>`;
     var i = 0,
         j = 0,
         topMargin = 200,
@@ -278,13 +282,9 @@ Snake.Game.prototype.drawGrid = function () {
             this.doc.body.appendChild(div);
         }
     }
-    this.gridDrawn = true;
 };
 
 Snake.Game.prototype.drawBox = function () {
-    if (this.boxDrawn) {
-        return;
-    }
     var i = 0,
         div = null,
         pt = null;
@@ -293,7 +293,6 @@ Snake.Game.prototype.drawBox = function () {
         div = this.doc.getElementById(this.cellID(pt.x, pt.y));
         div.className = 'cell box';
     }
-    this.boxDrawn = true;
 };
 
 Snake.Game.prototype.drawSnakeBody = function (element) {
@@ -306,7 +305,7 @@ Snake.Game.prototype.drawSnakeHead = function (element) {
     element.className = 'cell snake snake-head';
     element.innerHTML = `<img id="snake-head-img" src="images/snake.png" alt="" style="width: ${this.config.pixelSize}px; height: ${this.config.pixelSize}px">`;
     element.style['background-color'] = 'transparent';
-
+    console.log(this.state.direction)
     var deg = 0;
     switch (this.state.direction) {
         case Snake.Direction.Up:
@@ -326,6 +325,22 @@ Snake.Game.prototype.drawSnakeHead = function (element) {
     document.getElementById('snake-head-img').style.transform = 'rotate(' + deg + 'deg)';
 }
 
+
+Snake.Game.prototype.clearSnake = function () {
+    const existing = this.doc.getElementsByClassName('snake');
+    if (!existing) return;
+    for (i = 0; i < existing.length; i = i + 1) {
+        div = this.doc.getElementById(existing[i].id);
+        this.clearSnakePart(div);
+    }
+}
+
+Snake.Game.prototype.clearSnakePart = function (div) {
+    div.className = 'cell';
+    div.innerHTML = '';
+    div.style['background-color'] = 'transparent';
+}
+
 Snake.Game.prototype.drawSnake = function () {
     var i = 0,
         id = null,
@@ -337,20 +352,7 @@ Snake.Game.prototype.drawSnake = function () {
         requiredIDs[this.cellID(this.snake[i].x, this.snake[i].y)] = true;
     }
     // check existing cells
-    for (i = 0; i < existing.length; i = i + 1) {
-        // if the cell is required, leave it as is.
-        // else, "delete" it
-        if (!requiredIDs[existing[i].id]) {
-            div = this.doc.getElementById(existing[i].id);
-            div.className = 'cell';
-            div.innerHTML = '';
-            div.style['background-color'] = 'transparent';
-        } else {
-            // mark it as not missing
-            this.drawSnakeBody(existing[i]);
-            delete requiredIDs[existing[i].id];
-        }
-    }
+    this.clearSnake();
     // draw missing cell(s)
     var isHead = true;
     for (id in requiredIDs) {
@@ -414,15 +416,10 @@ Snake.Game.prototype.drawHUD = function () {
 };
 
 Snake.Game.prototype.draw = function () {
-    this.drawHUD();
-
-    if (this.state.gameOver) {
+    if (this.state.gameOver || this.state.paused) {
         return;
     }
-
-    this.drawGrid();
-
-    this.drawBox();
+    this.drawHUD();
 
     this.drawSnake();
 
@@ -467,19 +464,31 @@ Snake.Game.prototype.increaseLevel = function () {
 };
 
 Snake.Game.prototype.loop = function () {
+    if (this.state.gameOver || this.state.paused) {
+        return;
+    }
     this.update();
     this.draw();
     this.wnd.setTimeout(this.loop.bind(this), this.state.loopIntervalMillis);
 };
 
-const startNewGameButton = document.getElementById("new-game-button");
-
-startNewGameButton.addEventListener("click", createNewGame);
-
 function createNewGame() {
+    if (document.game) delete document.game;
     document.game = new Snake.Game(document, window);
     startNewGameButton.style.display = "none";
 }
+
+let startNewGameButton;
+$(() => {
+    startNewGameButton = document.getElementById("new-game-button");
+    startNewGameButton.addEventListener("click", createNewGame);
+
+
+})
+
+
+
+
 
 
 
