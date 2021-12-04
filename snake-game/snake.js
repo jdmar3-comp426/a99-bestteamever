@@ -90,13 +90,16 @@ Snake.Game = function (doc, wnd) {
     this.boxDrawn = false;
 
     // Force first loop, to make game more responsive at first
+    this.initBox();
+    this.initSnake();
+    this.drawGrid();
+    this.drawBox();
+    this.clearSnake();
+    this.displayHighScore();
     this.loop();
 };
 
 Snake.Game.prototype.initBox = function () {
-    if (this.box) {
-        return;
-    }
     var x = 0, y = 0;
     this.box = [];
     // left
@@ -122,9 +125,6 @@ Snake.Game.prototype.initBox = function () {
 };
 
 Snake.Game.prototype.initSnake = function () {
-    if (this.snake) {
-        return;
-    }
     var i = 0,
         x = Math.floor(this.config.boxSize / 2);
     this.snake = [];
@@ -169,6 +169,7 @@ Snake.Game.prototype.moveSnake = function () {
         if (treatImgs[0]) {
             treatImgs[0].remove();
         }
+        this.drawTreat();
         delete this.treat;
     } else {
         // Remove tail, as treat was not eaten
@@ -192,9 +193,14 @@ Snake.Game.prototype.moveSnake = function () {
 
 Snake.Game.prototype.onGameOver = function () {
     this.state.gameOver = true;
-    startNewGameButton.style.display = "block";
+    initializeNewGameButton();
+
     return;
 };
+
+Snake.Game.prototype.updateHighestScore = function () {
+    const currentScore = this.state.score;
+}
 
 // http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
 Snake.Game.prototype.getRandomInt = function (min, max) {
@@ -222,17 +228,9 @@ Snake.Game.prototype.placeTreat = function () {
 };
 
 Snake.Game.prototype.update = function () {
-    this.initBox();
-    this.initSnake();
-
-    if (this.state.paused) {
+    if (this.state.gameOver || this.state.paused) {
         return;
     }
-
-    if (this.state.gameOver) {
-        return;
-    }
-
     this.placeTreat();
 
     this.moveSnake();
@@ -246,10 +244,35 @@ Snake.Game.prototype.cellID = function (x, y) {
     return 'cell_' + x + '_' + y;
 };
 
-Snake.Game.prototype.drawGrid = function () {
-    if (this.gridDrawn) {
-        return;
+//https://stackoverflow.com/questions/1484506/random-color-generator
+Snake.Game.prototype.getRandomColor = function () {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
     }
+    return color;
+}
+
+const bodyInitialHTML = `
+<div id="hud">
+    <div>
+        Level: <span id="level">0</span>
+    </div>
+    <div>
+        Score: <span id="score">0</span>
+    </div>
+    <div>
+        Highest Score: <span id="highest-score">0</span>
+    </div>
+    <div>
+        <span id="state"></span>
+    </div>
+</div>
+<div id="board"></div>`
+
+Snake.Game.prototype.drawGrid = function () {
+    document.body.innerHTML = bodyInitialHTML;
     var i = 0,
         j = 0,
         topMargin = 200,
@@ -258,21 +281,18 @@ Snake.Game.prototype.drawGrid = function () {
         for (j = 0; j < this.config.boxSize; j = j + 1) {
             div = this.doc.createElement('div');
             div.className = 'cell';
+            div.style.position = 'absolute';
             div.style.width = this.config.pixelSize + 'px';
             div.style.height = this.config.pixelSize + 'px';
             div.style.left = (i * this.config.pixelSize) + 'px';
             div.style.top = topMargin + (j * this.config.pixelSize) + 'px';
             div.id = this.cellID(i, this.config.boxSize - j - 1);
-            this.doc.body.appendChild(div);
+            document.getElementById('board').appendChild(div);
         }
     }
-    this.gridDrawn = true;
 };
 
 Snake.Game.prototype.drawBox = function () {
-    if (this.boxDrawn) {
-        return;
-    }
     var i = 0,
         div = null,
         pt = null;
@@ -281,37 +301,84 @@ Snake.Game.prototype.drawBox = function () {
         div = this.doc.getElementById(this.cellID(pt.x, pt.y));
         div.className = 'cell box';
     }
-    this.boxDrawn = true;
 };
+
+Snake.Game.prototype.fetchHighScore = function () {
+    return -1;
+}
+
+Snake.Game.prototype.displayHighScore = function () {
+    const highestScore = this.fetchHighScore();
+    document.getElementById('highest-score').innerHTML = highestScore;
+}
+
+Snake.Game.prototype.drawSnakeBody = function (element) {
+    element.className = 'cell snake snake-body';
+    element.innerHTML = '';
+    element.style['background-color'] = this.getRandomColor();
+}
+
+Snake.Game.prototype.drawSnakeHead = function (element) {
+    element.className = 'cell snake snake-head';
+
+    var deg = 0;
+    switch (this.state.direction) {
+        case Snake.Direction.Up:
+            deg = 180;
+            break;
+        case Snake.Direction.Right:
+            deg = -90;
+            break;
+        case Snake.Direction.Down:
+            deg = 0;
+            break;
+        case Snake.Direction.Left:
+            deg = 90;
+            break;
+    }
+
+    element.innerHTML = `<img id="snake-head-img" src="images/snake.png" alt="" style="width: ${this.config.pixelSize}px; height: ${this.config.pixelSize}px; transform: rotate(${deg}deg)">`;
+    element.style['background-color'] = 'transparent';
+}
+
+
+Snake.Game.prototype.clearSnake = function () {
+    const existing = this.doc.getElementsByClassName('snake');
+    if (!existing) return;
+    for (i = 0; i < existing.length; i = i + 1) {
+        div = this.doc.getElementById(existing[i].id);
+        this.clearSnakePart(div);
+    }
+}
+
+Snake.Game.prototype.clearSnakePart = function (div) {
+    div.className = 'cell';
+    div.innerHTML = '';
+    div.style['background-color'] = 'transparent';
+}
 
 Snake.Game.prototype.drawSnake = function () {
     var i = 0,
         id = null,
         div = null,
-        existing = this.doc.getElementsByClassName('snake'),
         requiredIDs = {};
     // lookup required cells
     for (i = 0; i < this.snake.length; i = i + 1) {
         requiredIDs[this.cellID(this.snake[i].x, this.snake[i].y)] = true;
     }
     // check existing cells
-    for (i = 0; i < existing.length; i = i + 1) {
-        // if the cell is required, leave it as is.
-        // else, "delete" it
-        if (!requiredIDs[existing[i].id]) {
-            div = this.doc.getElementById(existing[i].id);
-            div.className = 'cell';
-        } else {
-            // mark it as not missing
-            delete requiredIDs[existing[i].id];
-        }
-    }
+    this.clearSnake();
     // draw missing cell(s)
+    var isHead = true;
     for (id in requiredIDs) {
         if (requiredIDs.hasOwnProperty(id)) {
             div = this.doc.getElementById(id);
-            div.className = 'cell snake';
-
+            if (isHead) {
+                this.drawSnakeHead(div);
+                isHead = false;
+            } else {
+                this.drawSnakeBody(div);
+            }
         }
     }
 };
@@ -332,18 +399,13 @@ Snake.Game.prototype.drawTreat = function () {
     // If there's a treat, check if its the same as displayed.
     requiredID = this.cellID(this.treat.x, this.treat.y);
 
-    const allImageNames = ['apple.png', 'banana.png', 'old-well.png'];
+    const allImageNames = ['apple.png', 'banana.png', 'old-well.png', 'cherries.png', 'corn.png', 'grapes.png', 'pepper.png', 'pumpkin.png', 'strawberry.png'];
     const randomId = Math.floor(Math.random() * allImageNames.length);
     const imageName = allImageNames[randomId];
 
     if (existing[0]) {
         //already drawn
     } else {
-        //remove drawn treats and draw new
-        // const treatImgs = this.doc.getElementsByClassName('treat-img');
-        // if (treatImgs[0]) {
-        //     treatImgs[0].remove();
-        // }
         div = this.doc.getElementById(requiredID);
         div.className = 'cell treat';
         div.innerHTML = `
@@ -355,11 +417,14 @@ Snake.Game.prototype.drawTreat = function () {
 Snake.Game.prototype.stateDescription = function () {
     if (this.state.gameOver) {
         return "GAME OVER";
-    }
-    if (this.state.paused) {
+    } else if (this.state.paused) {
         return "PAUSED (PRESS R TO RESUME)";
+    } else {
+        return '';
     }
-    return "PRESS P TO PAUSE";
+
+    //return "PRESS P TO PAUSE";
+
 };
 
 Snake.Game.prototype.drawHUD = function () {
@@ -369,15 +434,9 @@ Snake.Game.prototype.drawHUD = function () {
 };
 
 Snake.Game.prototype.draw = function () {
+    if (this.state.gameOver) return;
+
     this.drawHUD();
-
-    if (this.state.gameOver) {
-        return;
-    }
-
-    this.drawGrid();
-
-    this.drawBox();
 
     this.drawSnake();
 
@@ -422,19 +481,37 @@ Snake.Game.prototype.increaseLevel = function () {
 };
 
 Snake.Game.prototype.loop = function () {
+    if (this.state.gameOver || this.state.paused) return;
     this.update();
     this.draw();
     this.wnd.setTimeout(this.loop.bind(this), this.state.loopIntervalMillis);
 };
 
-const startNewGameButton = document.getElementById("new-game-button");
-
-startNewGameButton.addEventListener("click", createNewGame);
-
 function createNewGame() {
+    if (document.game) delete document.game;
     document.game = new Snake.Game(document, window);
-    startNewGameButton.style.display = "none";
 }
+
+function initializeNewGameButton() {
+    var startNewGameButton = document.createElement('div');
+    startNewGameButton.innerHTML = `<button id="new-game-button">New Game</button>`;
+    startNewGameButton.addEventListener("click", createNewGame);
+    document.body.appendChild(startNewGameButton);
+}
+
+
+
+window.onload = function () {
+    initializeNewGameButton();
+}
+
+
+
+
+
+
+
+
 
 
 

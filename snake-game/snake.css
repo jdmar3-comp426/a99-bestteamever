@@ -1,6 +1,18 @@
+body {
+	position: relative;
+	background-color: antiquewhite;
+}
+
 #hud {
 	height:100px;
 }
+
+#board {
+    margin-left: 50%;
+    -webkit-transform: translate(-50%, 0);
+    transform: translate(-50%, 0);
+}
+
 .cell {
 	position: absolute;
 }
@@ -8,8 +20,16 @@
 	background-color: black;
 }
 .snake {
-	background-color: green;
+
 }
+.snake-body {
+	border-radius: 50px;
+}
+.snake-head {
+
+}
+
+
 .treat {
 	background-color: transparent;
 }
