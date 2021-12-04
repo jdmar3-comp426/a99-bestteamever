@@ -274,8 +274,8 @@ Snake.Game.prototype.drawGrid = function () {
         <div>
             <span id="state"></span>
         </div>
-        
-    </div>`;
+    </div>
+    <div id="board"></div>`;
     var i = 0,
         j = 0,
         topMargin = 200,
@@ -284,12 +284,13 @@ Snake.Game.prototype.drawGrid = function () {
         for (j = 0; j < this.config.boxSize; j = j + 1) {
             div = this.doc.createElement('div');
             div.className = 'cell';
+            div.style.position = 'absolute';
             div.style.width = this.config.pixelSize + 'px';
             div.style.height = this.config.pixelSize + 'px';
             div.style.left = (i * this.config.pixelSize) + 'px';
             div.style.top = topMargin + (j * this.config.pixelSize) + 'px';
             div.id = this.cellID(i, this.config.boxSize - j - 1);
-            this.doc.body.appendChild(div);
+            document.getElementById('board').appendChild(div);
         }
     }
 };
