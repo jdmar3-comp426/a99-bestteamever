@@ -193,11 +193,7 @@ Snake.Game.prototype.moveSnake = function () {
 
 Snake.Game.prototype.onGameOver = function () {
     this.state.gameOver = true;
-    startNewGameButton.style.display = "block";
-    var button = document.createElement('div');
-    button.innerHTML = `<button id="new-game-button">New Game</button>`;
-    button.addEventListener("click", createNewGame);
-    document.body.appendChild(button);
+    initializeNewGameButton();
 
     return;
 };
@@ -258,24 +254,25 @@ Snake.Game.prototype.getRandomColor = function () {
     return color;
 }
 
+const bodyInitialHTML = `
+<div id="hud">
+    <div>
+        Level: <span id="level">0</span>
+    </div>
+    <div>
+        Score: <span id="score">0</span>
+    </div>
+    <div>
+        Highest Score: <span id="highest-score">0</span>
+    </div>
+    <div>
+        <span id="state"></span>
+    </div>
+</div>
+<div id="board"></div>`
 
 Snake.Game.prototype.drawGrid = function () {
-    document.body.innerHTML = `
-    <div id="hud">
-        <div>
-            Level: <span id="level">0</span>
-        </div>
-        <div>
-            Score: <span id="score">0</span>
-        </div>
-        <div>
-			Highest Score: <span id="highest-score">0</span>
-		</div>
-        <div>
-            <span id="state"></span>
-        </div>
-    </div>
-    <div id="board"></div>`;
+    document.body.innerHTML = bodyInitialHTML;
     var i = 0,
         j = 0,
         topMargin = 200,
@@ -364,7 +361,6 @@ Snake.Game.prototype.drawSnake = function () {
     var i = 0,
         id = null,
         div = null,
-        existing = this.doc.getElementsByClassName('snake'),
         requiredIDs = {};
     // lookup required cells
     for (i = 0; i < this.snake.length; i = i + 1) {
@@ -403,7 +399,7 @@ Snake.Game.prototype.drawTreat = function () {
     // If there's a treat, check if its the same as displayed.
     requiredID = this.cellID(this.treat.x, this.treat.y);
 
-    const allImageNames = ['apple.png', 'banana.png', 'old-well.png'];
+    const allImageNames = ['apple.png', 'banana.png', 'old-well.png', 'cherries.png', 'corn.png', 'grapes.png', 'pepper.png', 'pumpkin.png', 'strawberry.png'];
     const randomId = Math.floor(Math.random() * allImageNames.length);
     const imageName = allImageNames[randomId];
 
@@ -421,12 +417,14 @@ Snake.Game.prototype.drawTreat = function () {
 Snake.Game.prototype.stateDescription = function () {
     if (this.state.gameOver) {
         return "GAME OVER";
-    }
-    if (this.state.paused) {
+    } else if (this.state.paused) {
         return "PAUSED (PRESS R TO RESUME)";
+    } else {
+        return '';
     }
+
     //return "PRESS P TO PAUSE";
-    return '';
+
 };
 
 Snake.Game.prototype.drawHUD = function () {
@@ -436,9 +434,8 @@ Snake.Game.prototype.drawHUD = function () {
 };
 
 Snake.Game.prototype.draw = function () {
-    if (this.state.gameOver || this.state.paused) {
-        return;
-    }
+    if (this.state.gameOver) return;
+
     this.drawHUD();
 
     this.drawSnake();
@@ -484,9 +481,7 @@ Snake.Game.prototype.increaseLevel = function () {
 };
 
 Snake.Game.prototype.loop = function () {
-    if (this.state.gameOver || this.state.paused) {
-        return;
-    }
+    if (this.state.gameOver || this.state.paused) return;
     this.update();
     this.draw();
     this.wnd.setTimeout(this.loop.bind(this), this.state.loopIntervalMillis);
@@ -495,13 +490,19 @@ Snake.Game.prototype.loop = function () {
 function createNewGame() {
     if (document.game) delete document.game;
     document.game = new Snake.Game(document, window);
-    startNewGameButton.style.display = "none";
 }
 
-let startNewGameButton;
-window.onload = function () {
-    startNewGameButton = document.getElementById("new-game-button");
+function initializeNewGameButton() {
+    var startNewGameButton = document.createElement('div');
+    startNewGameButton.innerHTML = `<button id="new-game-button">New Game</button>`;
     startNewGameButton.addEventListener("click", createNewGame);
+    document.body.appendChild(startNewGameButton);
+}
+
+
+
+window.onload = function () {
+    initializeNewGameButton();
 }
 
 
