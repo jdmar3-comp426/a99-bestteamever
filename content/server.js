@@ -16,7 +16,8 @@ var HTTP_PORT = 5000;
 app.listen(HTTP_PORT, () => {
     console.log("Server running on port %PORT%".replace("%PORT%",HTTP_PORT))
 });
-// READ (HTTP method GET) at root endpoint /app/
+
+// Get all the registered users (HTTP method GET) at endpoint /app/users/all
 app.get("/app/users/all", (req, res) => {	
 	const stmt = db.prepare("SELECT * FROM userinfo").all();
 	res.status(200).json(stmt);
@@ -32,7 +33,7 @@ app.post("/app/new/", (req, res) => {
 });
 
 
-// READ a single user (HTTP method GET) at endpoint /app/user/:id
+// READ a single user (HTTP method GET) at endpoint /app/user/:user/:pass
 app.get("/app/user/:user/:pass/", (req, res) => {	
 	const stmt = db.prepare("SELECT highestscore FROM userinfo WHERE user = ? AND pass= ?").get(req.params.user, md5(req.params.pass));
 	if(stmt==undefined){
