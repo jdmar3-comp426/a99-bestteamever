@@ -1,54 +1,21 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-f059dc9a6f8d3a56e377f745f24479a46679e63a5d9fe6f495e02850cd0d8118.svg)](https://classroom.github.com/online_ide?assignment_repo_id=6440967&assignment_repo_type=AssignmentRepo)
-# a99 Snake
 
-A99 Snake is a game app which allows users to play the Snake game in a carefully-designed immersive environment. The user has to sign up an account and log into his or her account to play the game. By doing so, the highest score of the user will also be recorded which can be used to compare in later trys. We modified the shape and color of the snake to make it more visually appealing. The color of the snake is going to change as the snake moves. We use different fruits to represent the treat for the snake. 
+# COMP426 FA21 Final Project 
+This is the COMP426 final project repository for TEAM BESTTEAMEVER.
 
-## First steps
-
-Other steps that you will need to take after you have cloned this repository:
-
-1. Choose and update the LICENSE file accordingly. 
-2. Edit this README.md file and use it as the main location of your technical documentation with links out to information contained under `/docs/`.
-3. Create a `/docs/` directory for more elaborate documentation of your API, planning notes, etc.
-4. Make sure that all of your team members have access to the repository as administrators.
-5. Create a project under the **Projects** tab. Use this to manage your planning. Create a To-do list, etc. Explore the tools available and user them to manage your project.
-7. Assign team roles and include a listing of those roles in this README.md file or in another file under `/docs/`.
-8. Then put your entire development workflow in this repository.
-9. Use **Pull requests** to propose changes and incorporate them into your code from various team members. 
-10. Use **Issues** to identify and track bugs and also to communicate about various aspects of the project.
+## Team Member
+Hanqi Hua, Ziheng Wang, Ruoting Xia, Haiyun Zhou
 
 ## Team mangement
+1. Front end lead: Ziheng Wang
+2. Back end lead: Hanqi Hua
+3. review manager and plan manager: Ruoting Xia
+4. documentation manager: Haiyun Zhou
 
-Plan to meet with your team ASAP.
-Talk through identifying roles within your team.
+## Project Detail
+We built a game system that is composed of a user login system and a snake game. 
 
-Try to figure out what each of you are good at/enjoy doing and try to work out roles that incorporate that.
-
-Some basic roles you will want to consider:
-
-1. A review manager - someone to review pull requests and merge or reject them and manage the related discussions
-2. A plan manager - someone to keep an eye on the overall plan and keep the project tab/to-do list up to date
-3. A documentation manager - someone to keep the documentation in order and identify what is missing and needs to be documented
-4. Roles for team members to take charge or different parts of the project. Possible roles:
-    1. Front end lead
-    2. Back end lead
-    3. Databse lead
-    4. Design lead
-    5. Etc.
-
-You will notice that there are more roles than people in your group.
-That is because you will all be doing a hybrid job of managing a thing while working on other things.
-
-## Check in with instructional staff
-
-Once all the groups are together, we'll assign each group to an LA to check in with as you progress through the project.
-
-We will post that so that your team can schedule a time for an initial check-in with your assigned LA. It would be a good idea also to add your LA to your repository.
-
-## Assignment instructions
-
-And that is about all you need to get started.
-
-All the rest of the assignment instructions are available at: https://comp426.johndmart.in/assignments/99
-
-Good skill, and have fun with this!
+### Login System 
+Users must sign up for an account to play the game. User information will be stored and validated by the database (API Documents [here](https://github.com/huahanqi/a99-bestteamever/blob/main/docs/API_Documentation.txt)). Only correct pair of user name and password can successfully log in to the system and start to play the game. Inside the game, users can play the snake game multiple times, and the highest score will be recorded. If the user wants to exit, he/she can simply click the logout button and exit. Next time, the user still has to enter his/her account information to enter the system. 
+### Snake Game
+The player controls a long, thin creature, resembling a snake, which roams around on a bordered plane, picking up food, trying to avoid hitting its own tail or the edges of the playing area. Each time the snake eats a piece of food, its tail grows longer and it moves faster, making the game increasingly difficult. The user controls the direction of the snake's head (up, down, left, or right), and the snake's body follows. More Information about [Snake game](https://en.wikipedia.org/wiki/Snake_(video_game_genre)).
