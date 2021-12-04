@@ -66,10 +66,9 @@ Snake.Point.prototype.toString = function () {
     return this.x + "," + this.y;
 };
 
-Snake.Point.prototype.collides = function (arr) {
-    var i;
-    for (i = 0; i < arr.length; i = i + 1) {
-        if (this.x === arr[i].x && this.y === arr[i].y) {
+Snake.Point.prototype.collides = function (array) {
+    for (let i = 0; i < array.length; i++) {
+        if ((this.x === array[i].x) && (this.y === array[i].y)) {
             return true;
         }
     }
@@ -103,33 +102,31 @@ Snake.Game.prototype.initBox = function () {
     var x = 0, y = 0;
     this.box = [];
     // left
-    x = 0;
-    for (y = 0; y < this.config.boxSize; y = y + 1) {
-        this.box.push(new Snake.Point(x, y));
-    }
-    // top
-    y = this.config.boxSize - 1;
-    for (x = 0; x < this.config.boxSize; x = x + 1) {
+    for (y = 0; y < this.config.boxSize; y++) {
         this.box.push(new Snake.Point(x, y));
     }
     // right
     x = this.config.boxSize - 1;
-    for (y = this.config.boxSize - 2; y >= 0; y = y - 1) {
+    for (y = this.config.boxSize - 2; y >= 0; y--) {
+        this.box.push(new Snake.Point(x, y));
+    }
+    // top
+    y = this.config.boxSize - 1;
+    for (x = 0; x < this.config.boxSize; x++) {
         this.box.push(new Snake.Point(x, y));
     }
     // bottom
     y = 0;
-    for (x = this.config.boxSize - 2; x > 0; x = x - 1) {
+    for (x = this.config.boxSize - 2; x > 0; x--) {
         this.box.push(new Snake.Point(x, y));
     }
 };
 
 Snake.Game.prototype.initSnake = function () {
-    var i = 0,
-        x = Math.floor(this.config.boxSize / 2);
+    var x = Math.floor(this.config.boxSize / 2);
     this.snake = [];
     // from head to tail
-    for (i = this.config.snakeLength; i > 0; i = i - 1) {
+    for (let i = this.config.snakeLength; i > 0; i--) {
         this.snake.push(new Snake.Point(x, i));
     }
 };
@@ -202,12 +199,15 @@ Snake.Game.prototype.updateHighestScore = function () {
     const currentScore = this.state.score;
 }
 
-// http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
 Snake.Game.prototype.getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 Snake.Game.prototype.placeTreat = function () {
+    var x = 0, 
+        y = 0, 
+        treat = null;
+
     if (this.state.ticks - this.state.lastTreatTick >= this.config.treatRepositionTicks) {
         delete this.treat;
     }
@@ -215,7 +215,7 @@ Snake.Game.prototype.placeTreat = function () {
     if (this.treat) {
         return;
     }
-    var x = 0, y = 0, treat = null;
+    
     while (!this.treat) {
         x = this.getRandomInt(1, this.config.boxSize - 1);
         y = this.getRandomInt(1, this.config.boxSize - 1);
@@ -363,7 +363,7 @@ Snake.Game.prototype.drawSnake = function () {
         div = null,
         requiredIDs = {};
     // lookup required cells
-    for (i = 0; i < this.snake.length; i = i + 1) {
+    for (i = 0; i < this.snake.length; i++) {
         requiredIDs[this.cellID(this.snake[i].x, this.snake[i].y)] = true;
     }
     // check existing cells
