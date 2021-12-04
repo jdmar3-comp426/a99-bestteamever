@@ -1,7 +1,7 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-f059dc9a6f8d3a56e377f745f24479a46679e63a5d9fe6f495e02850cd0d8118.svg)](https://classroom.github.com/online_ide?assignment_repo_id=6440967&assignment_repo_type=AssignmentRepo)
-# a99 Finally
+# a99 Snake
 
-COMP426 final project template repository. All your code and documentation goes here. Change this text to be a brief description of your final project. Put the name in the header above. You will change everything below to be the main technical documentation, as outlined below.
+A99 Snake is a game app which allows users to play the Snake game in a carefully-designed immersive environment. The user has to sign up an account and log into his or her account to play the game. By doing so, the highest score of the user will also be recorded which can be used to compare in later trys. We modified the shape and color of the snake to make it more visually appealing. The color of the snake is going to change as the snake moves. We use different fruits to represent the treat for the snake. 
 
 ## First steps
 
