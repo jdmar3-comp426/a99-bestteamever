@@ -95,6 +95,7 @@ Snake.Game = function (doc, wnd) {
     this.drawGrid();
     this.drawBox();
     this.clearSnake();
+    this.displayHighScore();
     this.loop();
 };
 
@@ -197,8 +198,13 @@ Snake.Game.prototype.onGameOver = function () {
     button.innerHTML = `<button id="new-game-button">New Game</button>`;
     button.addEventListener("click", createNewGame);
     document.body.appendChild(button);
+
     return;
 };
+
+Snake.Game.prototype.updateHighestScore = function () {
+    const currentScore = this.state.score;
+}
 
 // http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
 Snake.Game.prototype.getRandomInt = function (min, max) {
@@ -263,8 +269,12 @@ Snake.Game.prototype.drawGrid = function () {
             Score: <span id="score">0</span>
         </div>
         <div>
+			Highest Score: <span id="highest-score">0</span>
+		</div>
+        <div>
             <span id="state"></span>
         </div>
+        
     </div>`;
     var i = 0,
         j = 0,
@@ -295,6 +305,15 @@ Snake.Game.prototype.drawBox = function () {
     }
 };
 
+Snake.Game.prototype.fetchHighScore = function () {
+    return -1;
+}
+
+Snake.Game.prototype.displayHighScore = function () {
+    const highestScore = this.fetchHighScore();
+    document.getElementById('highest-score').innerHTML = highestScore;
+}
+
 Snake.Game.prototype.drawSnakeBody = function (element) {
     element.className = 'cell snake snake-body';
     element.innerHTML = '';
@@ -303,9 +322,7 @@ Snake.Game.prototype.drawSnakeBody = function (element) {
 
 Snake.Game.prototype.drawSnakeHead = function (element) {
     element.className = 'cell snake snake-head';
-    element.innerHTML = `<img id="snake-head-img" src="images/snake.png" alt="" style="width: ${this.config.pixelSize}px; height: ${this.config.pixelSize}px">`;
-    element.style['background-color'] = 'transparent';
-    console.log(this.state.direction)
+
     var deg = 0;
     switch (this.state.direction) {
         case Snake.Direction.Up:
@@ -322,7 +339,8 @@ Snake.Game.prototype.drawSnakeHead = function (element) {
             break;
     }
 
-    document.getElementById('snake-head-img').style.transform = 'rotate(' + deg + 'deg)';
+    element.innerHTML = `<img id="snake-head-img" src="images/snake.png" alt="" style="width: ${this.config.pixelSize}px; height: ${this.config.pixelSize}px; transform: rotate(${deg}deg)">`;
+    element.style['background-color'] = 'transparent';
 }
 
 
@@ -406,7 +424,8 @@ Snake.Game.prototype.stateDescription = function () {
     if (this.state.paused) {
         return "PAUSED (PRESS R TO RESUME)";
     }
-    return "PRESS P TO PAUSE";
+    //return "PRESS P TO PAUSE";
+    return '';
 };
 
 Snake.Game.prototype.drawHUD = function () {
