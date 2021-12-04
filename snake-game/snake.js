@@ -2,32 +2,28 @@ var Snake = {};
 
 // Configuration
 Snake.Config = function () {
-    // Pixel size.
-    this.pixelSize = 20;
+    // Pixel size
+    this.pixel_size = 20;
 
-    // Box size in pixels
-    this.boxSize = 15;
+    // Box size (pixels)
+    this.box_size = 15;
 
-    // Snake is initially drawn using N pixels.
-    this.snakeLength = 3;
+    // Snake length (pixels)
+    this.snake_length = 3;
 
     // Every now and then (interval should be configurable from code)
     // snake gains speed, ie. level is increased.
-    // We use loop ticks as interval, not millis, since the game can
-    // be paused and resumed.
-    this.levelIntervalTicks = 30;
+    this.interval_ticks = 30;
 
     // If snake wonders for too long (30 sec for instance) treat
     // is repositioned.
-    // We use loop ticks as interval, not millis, since the game can
-    // be paused and resumed.
-    this.treatRepositionTicks = 30;
+    this.reposition_ticks = 30;
 
     // Game speed is increased by N millis with each level.
-    this.levelIncreaseMillis = 200;
+    this.speedChange_millis = 200;
 
     // Maximum game speed is N millis.
-    this.minimumLoopIntervalMillis = 300;
+    this.minSpeed_millis = 300;
 };
 
 // Initial game state
@@ -67,8 +63,7 @@ Snake.Point.prototype.toString = function () {
 };
 
 Snake.Point.prototype.collides = function (arr) {
-    var i;
-    for (i = 0; i < arr.length; i = i + 1) {
+    for (let i = 0; i < arr.length; i++) {
         if (this.x === arr[i].x && this.y === arr[i].y) {
             return true;
         }
@@ -101,22 +96,22 @@ Snake.Game.prototype.initBox = function () {
     this.box = [];
     // left
     x = 0;
-    for (y = 0; y < this.config.boxSize; y = y + 1) {
+    for (y = 0; y < this.config.box_size; y++) {
         this.box.push(new Snake.Point(x, y));
     }
     // top
-    y = this.config.boxSize - 1;
-    for (x = 0; x < this.config.boxSize; x = x + 1) {
+    y = this.config.box_size - 1;
+    for (x = 0; x < this.config.box_size; x++) {
         this.box.push(new Snake.Point(x, y));
     }
     // right
-    x = this.config.boxSize - 1;
-    for (y = this.config.boxSize - 2; y >= 0; y = y - 1) {
+    x = this.config.box_size - 1;
+    for (y = this.config.box_size - 2; y >= 0; y--) {
         this.box.push(new Snake.Point(x, y));
     }
     // bottom
     y = 0;
-    for (x = this.config.boxSize - 2; x > 0; x = x - 1) {
+    for (x = this.config.box_size - 2; x > 0; x = x - 1) {
         this.box.push(new Snake.Point(x, y));
     }
 };
@@ -126,10 +121,10 @@ Snake.Game.prototype.initSnake = function () {
         return;
     }
     var i = 0,
-        x = Math.floor(this.config.boxSize / 2);
+        x = Math.floor(this.config.box_size / 2);
     this.snake = [];
     // from head to tail
-    for (i = this.config.snakeLength; i > 0; i = i - 1) {
+    for (i = this.config.snake_length; i > 0; i--) {
         this.snake.push(new Snake.Point(x, i));
     }
 };
@@ -154,7 +149,7 @@ Snake.Game.prototype.calculateShift = function () {
 };
 
 Snake.Game.prototype.moveSnake = function () {
-    // Calculate new head
+    // new head
     var head = new Snake.Point(this.snake[0].x, this.snake[0].y),
         shift = this.calculateShift();
     head.x = head.x + shift.x;
@@ -196,13 +191,12 @@ Snake.Game.prototype.onGameOver = function () {
     return;
 };
 
-// http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
 Snake.Game.prototype.getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 Snake.Game.prototype.placeTreat = function () {
-    if (this.state.ticks - this.state.lastTreatTick >= this.config.treatRepositionTicks) {
+    if (this.state.ticks - this.state.lastTreatTick >= this.config.reposition_ticks) {
         delete this.treat;
     }
 
@@ -211,8 +205,8 @@ Snake.Game.prototype.placeTreat = function () {
     }
     var x = 0, y = 0, treat = null;
     while (!this.treat) {
-        x = this.getRandomInt(1, this.config.boxSize - 1);
-        y = this.getRandomInt(1, this.config.boxSize - 1);
+        x = this.getRandomInt(1, this.config.box_size - 1);
+        y = this.getRandomInt(1, this.config.box_size - 1);
         treat = new Snake.Point(x, y);
         if (!treat.collides(this.snake) && !treat.collides(this.box)) {
             this.treat = treat;
@@ -254,15 +248,15 @@ Snake.Game.prototype.drawGrid = function () {
         j = 0,
         topMargin = 200,
         div = null;
-    for (i = 0; i < this.config.boxSize; i = i + 1) {
-        for (j = 0; j < this.config.boxSize; j = j + 1) {
+    for (i = 0; i < this.config.box_size; i++) {
+        for (j = 0; j < this.config.box_size; j++) {
             div = this.doc.createElement('div');
             div.className = 'cell';
-            div.style.width = this.config.pixelSize + 'px';
-            div.style.height = this.config.pixelSize + 'px';
-            div.style.left = (i * this.config.pixelSize) + 'px';
-            div.style.top = topMargin + (j * this.config.pixelSize) + 'px';
-            div.id = this.cellID(i, this.config.boxSize - j - 1);
+            div.style.width = this.config.pixel_size + 'px';
+            div.style.height = this.config.pixel_size + 'px';
+            div.style.left = (i * this.config.pixel_size) + 'px';
+            div.style.top = topMargin + (j * this.config.pixel_size) + 'px';
+            div.id = this.cellID(i, this.config.box_size - j - 1);
             this.doc.body.appendChild(div);
         }
     }
@@ -347,7 +341,8 @@ Snake.Game.prototype.drawTreat = function () {
         div = this.doc.getElementById(requiredID);
         div.className = 'cell treat';
         div.innerHTML = `
-            <img class="treat-img" src="images/${imageName}" alt="" style="width: ${this.config.pixelSize}px; height: ${this.config.pixelSize}px">
+            <img class="treat-img" src="images/${imageName}" alt="" style="width: ${this.config.pixel_size
+            }px; height: ${this.config.pixel_size}px">
             `;
     }
 };
@@ -415,9 +410,9 @@ Snake.Game.prototype.increaseLevel = function () {
     this.state.level = this.state.level + 1;
 
     // Set new loop interval, but not less than n millis
-    this.state.loopIntervalMillis = this.state.loopIntervalMillis - this.config.levelIncreaseMillis;
-    if (this.state.loopIntervalMillis < this.config.minimumLoopIntervalMillis) {
-        this.state.loopIntervalMillis = this.config.minimumLoopIntervalMillis;
+    this.state.loopIntervalMillis = this.state.loopIntervalMillis - this.config.speedChange_millis;
+    if (this.state.loopIntervalMillis < this.config.minSpeed_millis) {
+        this.state.loopIntervalMillis = this.config.minSpeed_millis;
     }
 };
 
