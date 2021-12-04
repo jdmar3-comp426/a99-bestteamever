@@ -20,3 +20,7 @@ app.patch("/app/update/user/", (req, res) => {
 
 <a href="https://www.google.com/"
 onclick="location.href=this.href+'?xyz='+val;return false;">
+
+json({"message":`${info.changes} record created: User ${req.body.user} has been created!`})
+
+json({"message":`1 record has been found: User ${req.params.user} welcome back!`});

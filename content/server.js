@@ -25,25 +25,14 @@ app.get("/app/", (req, res, next) => {
 
 // CREATE a new user (HTTP method POST) at endpoint /app/new/
 app.post("/app/new/", (req, res) => {	
-	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?, ?)")
-	const info = stmt.run(req.body.user, md5(req.body.passagain));
-	res.status(201).json({"message":`${info.changes} record created: User ${req.body.user} has been created!`});
+	const stmt = db.prepare("INSERT INTO userinfo (user, pass, highestscore) VALUES (?, ?, ?)")
+	const info = stmt.run(req.body.user, md5(req.body.passagain), 0);
+	res.status(201).redirect(301, "http://localhost:8080/successfully_SignUp.html");
 });
 
-// READ a list of all users (HTTP method GET) at endpoint /app/users/
-app.get("/app/users/all", (req, res) => {	
-	const stmt = db.prepare("SELECT * FROM userinfo").all();
-	res.status(200).json(stmt);
-});
 
 // READ a single user (HTTP method GET) at endpoint /app/user/:id
 app.get("/app/user/:user/:pass/", (req, res) => {	
 	const stmt = db.prepare("SELECT * FROM userinfo WHERE user = ? AND pass= ?").get(req.params.user, md5(req.params.pass));
-	res.status(200).json({"message":`1 record has been found: User ${req.params.user} welcome back!`});
-});
-
-// Default response for any other request
-app.use(function(req, res){
-	res.json({"message":"Something Went Wrong!"});
-    res.status(404);
+	res.status(200).redirect(301, "http://localhost:8080/successfully_log_in.html")
 });
