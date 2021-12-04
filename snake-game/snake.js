@@ -69,8 +69,7 @@ Snake.Point.prototype.toString = function () {
 };
 
 Snake.Point.prototype.collides = function (arr) {
-    var i;
-    for (i = 0; i < arr.length; i = i + 1) {
+    for (let i = 0; i < arr.length; i++) {
         if (this.x === arr[i].x && this.y === arr[i].y) {
             return true;
         }
@@ -106,32 +105,31 @@ Snake.Game.prototype.initBox = function () {
     this.box = [];
     // left
     x = 0;
-    for (y = 0; y < this.config.boxSize; y = y + 1) {
-        this.box.push(new Snake.Point(x, y));
-    }
-    // top
-    y = this.config.boxSize - 1;
-    for (x = 0; x < this.config.boxSize; x = x + 1) {
+    for (y = 0; y < this.config.boxSize; y++) {
         this.box.push(new Snake.Point(x, y));
     }
     // right
     x = this.config.boxSize - 1;
-    for (y = this.config.boxSize - 2; y >= 0; y = y - 1) {
+    for (y = this.config.boxSize - 2; y >= 0; y--) {
+        this.box.push(new Snake.Point(x, y));
+    }
+    // top
+    y = this.config.boxSize - 1;
+    for (x = 0; x < this.config.boxSize; x++) {
         this.box.push(new Snake.Point(x, y));
     }
     // bottom
     y = 0;
-    for (x = this.config.boxSize - 2; x > 0; x = x - 1) {
+    for (x = this.config.boxSize - 2; x > 0; x--) {
         this.box.push(new Snake.Point(x, y));
     }
 };
 
 Snake.Game.prototype.initSnake = function () {
-    var i = 0,
-        x = Math.floor(this.config.boxSize / 2);
+    var x = Math.floor(this.config.boxSize / 2);
     this.snake = [];
     // from head to tail
-    for (i = this.config.snakeLength; i > 0; i = i - 1) {
+    for (let i = this.config.snakeLength; i > 0; i--) {
         this.snake.push(new Snake.Point(x, i));
     }
 };
@@ -304,7 +302,7 @@ Snake.Game.prototype.drawBox = function () {
     var i = 0,
         div = null,
         pt = null;
-    for (i = 0; i < this.box.length; i = i + 1) {
+    for (i = 0; i < this.box.length; i++) {
         pt = this.box[i];
         div = this.doc.getElementById(this.cellID(pt.x, pt.y));
         div.className = 'cell box';
@@ -352,8 +350,10 @@ Snake.Game.prototype.drawSnakeHead = function (element) {
 
 Snake.Game.prototype.clearSnake = function () {
     const existing = this.doc.getElementsByClassName('snake');
-    if (!existing) return;
-    for (i = 0; i < existing.length; i = i + 1) {
+    if (!existing) {
+        return;
+    }
+    for (let i = 0; i < existing.length; i++) {
         div = this.doc.getElementById(existing[i].id);
         this.clearSnakePart(div);
     }
@@ -371,7 +371,7 @@ Snake.Game.prototype.drawSnake = function () {
         div = null,
         requiredIDs = {};
     // lookup required cells
-    for (i = 0; i < this.snake.length; i = i + 1) {
+    for (i = 0; i < this.snake.length; i++) {
         requiredIDs[this.cellID(this.snake[i].x, this.snake[i].y)] = true;
     }
     // check existing cells
