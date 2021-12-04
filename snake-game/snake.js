@@ -30,6 +30,8 @@ Snake.Config = function () {
     this.minimumLoopIntervalMillis = 300;
 };
 
+var highestScore = 0;
+
 // Initial game state
 Snake.State = function () {
     this.level = 1;
@@ -194,12 +196,16 @@ Snake.Game.prototype.moveSnake = function () {
 Snake.Game.prototype.onGameOver = function () {
     this.state.gameOver = true;
     initializeNewGameButton();
-
+    this.updateHighestScore();
     return;
 };
 
 Snake.Game.prototype.updateHighestScore = function () {
     const currentScore = this.state.score;
+    if (currentScore > highestScore) {
+        highestScore = currentScore;
+        document.getElementById('highest-score').innerHTML = highestScore;
+    }
 }
 
 // http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
@@ -256,6 +262,7 @@ Snake.Game.prototype.getRandomColor = function () {
 
 const bodyInitialHTML = `
 <div id="hud">
+    <button id="logout" class="w-button-normal">Logout</button>
     <div>
         Level: <span id="level">0</span>
     </div>
@@ -273,6 +280,7 @@ const bodyInitialHTML = `
 
 Snake.Game.prototype.drawGrid = function () {
     document.body.innerHTML = bodyInitialHTML;
+    initializeLogoutButton();
     var i = 0,
         j = 0,
         topMargin = 200,
@@ -304,7 +312,7 @@ Snake.Game.prototype.drawBox = function () {
 };
 
 Snake.Game.prototype.fetchHighScore = function () {
-    return -1;
+    return highestScore;
 }
 
 Snake.Game.prototype.displayHighScore = function () {
@@ -494,9 +502,15 @@ function createNewGame() {
 
 function initializeNewGameButton() {
     var startNewGameButton = document.createElement('div');
-    startNewGameButton.innerHTML = `<button id="new-game-button">New Game</button>`;
+    startNewGameButton.innerHTML = `<button id="new-game-button" class="w-button-normal">New Game</button>`;
     startNewGameButton.addEventListener("click", createNewGame);
     document.body.appendChild(startNewGameButton);
+}
+
+function initializeLogoutButton() {
+    document.getElementById('logout').addEventListener('click', () => {
+        location.href = '../content/index_login.html'
+    })
 }
 
 
