@@ -11,32 +11,32 @@ Snake.Config = function () {
     // Initial snake length: N pixels
     this.snakeLength = 3;
 
-    // Snake speed changes
-    this.levelIntervalTicks = 30;
+    // Snake speed changes (ticks)
+    this.levelInterval = 30;
 
-    // The time for treat to be repositioned
-    this.treatRepositionTicks = 30;
+    // The time for treat to be repositioned (ticks)
+    this.treatReposition = 30;
 
-    // Increased game speed every level
-    this.levelIncreaseMillis = 200;
+    // Increased game speed every level (millis)
+    this.levelIncreaseM = 200;
 
     // Maximum game speed
-    this.minimumLoopIntervalMillis = 300;
+    this.minInterval = 300;
 };
 
 var highestScore = 0;
 
 // Initial game state
 Snake.State = function () {
-    this.level = 1;
-    this.score = 0;
     this.gameOver = false;
     this.paused = false;
-    this.loopIntervalMillis = 500;
-    this.direction = Snake.Direction.Up;
+    this.level = 1;
+    this.score = 0;
     this.ticks = 0;
     this.lastKeyTick = 0;
     this.lastTreatTick = 0;
+    this.loopIntervalM = 500;
+    this.direction = Snake.Direction.Up;
 };
 
 // Const keycodes
@@ -210,23 +210,25 @@ Snake.Game.prototype.updateHighestScore = function () {
 }
 
 // http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
-Snake.Game.prototype.getRandomInt = function (min, max) {
+Snake.Game.prototype.randomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 // Randomly placing a new treat
 Snake.Game.prototype.placeTreat = function () {
-    if (this.state.ticks - this.state.lastTreatTick >= this.config.treatRepositionTicks) {
+    if (this.state.ticks - this.state.lastTreatTick >= this.config.treatReposition) {
         delete this.treat;
     }
 
     if (this.treat) {
         return;
     }
-    var x = 0, y = 0, treat = null;
+    var x = 0, 
+        y = 0, 
+        treat = null;
     while (!this.treat) {
-        x = this.getRandomInt(1, this.config.boxSize - 1);
-        y = this.getRandomInt(1, this.config.boxSize - 1);
+        x = this.randomInt(1, this.config.boxSize - 1);
+        y = this.randomInt(1, this.config.boxSize - 1);
         treat = new Snake.Point(x, y);
         if (!treat.collide(this.snake) && !treat.collide(this.box)) {
             this.treat = treat;
@@ -246,7 +248,7 @@ Snake.Game.prototype.update = function () {
 
     this.state.ticks = this.state.ticks + 1;
 
-    this.increaseLevel();
+    this.levelIncrease();
 };
 
 Snake.Game.prototype.cellID = function (x, y) {
@@ -288,8 +290,8 @@ Snake.Game.prototype.drawGrid = function () {
         j = 0,
         topMargin = 200,
         div = null;
-    for (i = 0; i < this.config.boxSize; i = i + 1) {
-        for (j = 0; j < this.config.boxSize; j = j + 1) {
+    for (i = 0; i < this.config.boxSize; i++) {
+        for (j = 0; j < this.config.boxSize; j++) {
             div = this.doc.createElement('div');
             div.className = 'cell';
             div.style.position = 'absolute';
@@ -337,11 +339,11 @@ Snake.Game.prototype.drawSnakeHead = function (element) {
         case Snake.Direction.Up:
             deg = 180;
             break;
-        case Snake.Direction.Right:
-            deg = -90;
-            break;
         case Snake.Direction.Down:
             deg = 0;
+            break;
+        case Snake.Direction.Right:
+            deg = -90;
             break;
         case Snake.Direction.Left:
             deg = 90;
@@ -375,13 +377,12 @@ Snake.Game.prototype.drawSnake = function () {
         id = null,
         div = null,
         requiredIDs = {};
-    // lookup required cells
     for (i = 0; i < this.snake.length; i++) {
         requiredIDs[this.cellID(this.snake[i].x, this.snake[i].y)] = true;
     }
     // check existing cells
     this.clearSnake();
-    // draw missing cell(s)
+    // draw missing cells
     var isHead = true;
     for (id in requiredIDs) {
         if (requiredIDs.hasOwnProperty(id)) {
@@ -400,7 +401,7 @@ Snake.Game.prototype.drawTreat = function () {
     var div = 0,
         requiredID = null,
         existing = this.doc.getElementsByClassName('treat');
-    // If there's no treat, remove it from display
+    // If there's no treat, remove it
     if (!this.treat && existing.length) {
         existing[0].className = 'cell';
         existing[0].innerHTML = '';
@@ -409,7 +410,7 @@ Snake.Game.prototype.drawTreat = function () {
     if (!this.treat) {
         return;
     }
-    // If there's a treat, check if its the same as displayed.
+    // If there's a treat, check if it's the same as display
     requiredID = this.cellID(this.treat.x, this.treat.y);
 
     const allImageNames = ['apple.png', 'banana.png', 'old-well.png', 'cherries.png', 'corn.png', 'grapes.png', 'pepper.png', 'pumpkin.png', 'strawberry.png'];
@@ -436,8 +437,6 @@ Snake.Game.prototype.stateDescription = function () {
         return '';
     }
 
-    //return "PRESS P TO PAUSE";
-
 };
 
 Snake.Game.prototype.drawHUD = function () {
@@ -461,43 +460,45 @@ Snake.Game.prototype.onkeydown = function (evt) {
         return;
     }
     if (this.state.lastKeyTick === this.state.ticks) {
-        // Dont allow multiple keys in same tick
+        // Do not allow multiple keys
         return;
     }
-    var code = evt.keyCode;
-    if ((Snake.Direction.Up === code && Snake.Direction.Down !== this.state.direction)
-        || (Snake.Direction.Down === code && Snake.Direction.Up !== this.state.direction)
-        || (Snake.Direction.Left === code && Snake.Direction.Right !== this.state.direction)
-        || (Snake.Direction.Right === code && Snake.Direction.Left !== this.state.direction)) {
-        this.state.direction = code;
+    var kcode = evt.keyCode;
+    if ((Snake.Direction.Up === kcode && Snake.Direction.Down !== this.state.direction)
+        || (Snake.Direction.Down === kcode && Snake.Direction.Up !== this.state.direction)
+        || (Snake.Direction.Left === kcode && Snake.Direction.Right !== this.state.direction)
+        || (Snake.Direction.Right === kcode && Snake.Direction.Left !== this.state.direction)) {
+        this.state.direction = kcode;
         this.state.lastKeyTick = this.state.ticks;
-    } else if (Snake.KeyCode.Pause === code) {
+    } else if (Snake.KeyCode.Pause === kcode) {
         this.state.paused = true;
-    } else if (Snake.KeyCode.Resume === code) {
+    } else if (Snake.KeyCode.Resume === kcode) {
         this.state.paused = false;
     }
     return true;
 };
 
-Snake.Game.prototype.increaseLevel = function () {
-    if (this.state.ticks % this.config.levelIntervalTicks !== 0) {
+Snake.Game.prototype.levelIncrease = function () {
+    if (this.state.ticks % this.config.levelInterval !== 0) {
         return;
     }
 
-    this.state.level = this.state.level + 1;
+    this.state.level++;
 
-    // Set new loop interval, but not less than n millis
-    this.state.loopIntervalMillis = this.state.loopIntervalMillis - this.config.levelIncreaseMillis;
-    if (this.state.loopIntervalMillis < this.config.minimumLoopIntervalMillis) {
-        this.state.loopIntervalMillis = this.config.minimumLoopIntervalMillis;
+    // New loop interval
+    this.state.loopIntervalM -= this.config.levelIncreaseM;
+    if (this.state.loopIntervalM < this.config.minInterval) {
+        this.state.loopIntervalM = this.config.minInterval;
     }
 };
 
 Snake.Game.prototype.loop = function () {
-    if (this.state.gameOver || this.state.paused) return;
+    if (this.state.gameOver || this.state.paused) {
+        return;
+    }
     this.update();
     this.draw();
-    this.wnd.setTimeout(this.loop.bind(this), this.state.loopIntervalMillis);
+    this.wnd.setTimeout(this.loop.bind(this), this.state.loopIntervalM);
 };
 
 function createNewGame() {
@@ -517,8 +518,6 @@ function initializeLogoutButton() {
         location.href = '../content/index_login.html'
     })
 }
-
-
 
 window.onload = function () {
     initializeNewGameButton();
