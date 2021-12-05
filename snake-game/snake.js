@@ -2,31 +2,25 @@ var Snake = {};
 
 // Configuration
 Snake.Config = function () {
-    // Pixel size.
+
     this.pixelSize = 20;
 
-    // Box size in pixels
+    // Box size (pixels)
     this.boxSize = 15;
 
-    // Snake is initially drawn using N pixels.
+    // Initial snake length: N pixels
     this.snakeLength = 3;
 
-    // Every now and then (interval should be configurable from code)
-    // snake gains speed, ie. level is increased.
-    // We use loop ticks as interval, not millis, since the game can
-    // be paused and resumed.
+    // Snake speed changes
     this.levelIntervalTicks = 30;
 
-    // If snake wonders for too long (30 sec for instance) treat
-    // is repositioned.
-    // We use loop ticks as interval, not millis, since the game can
-    // be paused and resumed.
+    // The time for treat to be repositioned
     this.treatRepositionTicks = 30;
 
-    // Game speed is increased by N millis with each level.
+    // Increased game speed every level
     this.levelIncreaseMillis = 200;
 
-    // Maximum game speed is N millis.
+    // Maximum game speed
     this.minimumLoopIntervalMillis = 300;
 };
 
@@ -58,7 +52,7 @@ Snake.KeyCode = {
     Resume: 82,
 };
 
-// Point represents a point on the screen (x, y)
+// A point
 Snake.Point = function (x, y) {
     this.x = x;
     this.y = y;
@@ -68,9 +62,9 @@ Snake.Point.prototype.toString = function () {
     return this.x + "," + this.y;
 };
 
-Snake.Point.prototype.collides = function (arr) {
+Snake.Point.prototype.collide = function (arr) {
     for (let i = 0; i < arr.length; i++) {
-        if (this.x === arr[i].x && this.y === arr[i].y) {
+        if ((this.x === arr[i].x) && (this.y === arr[i].y)) {
             return true;
         }
     }
@@ -106,22 +100,26 @@ Snake.Game.prototype.initBox = function () {
     // left
     x = 0;
     for (y = 0; y < this.config.boxSize; y++) {
-        this.box.push(new Snake.Point(x, y));
+        position = new Snake.Point(x,y);
+        this.box.push(position);
     }
     // right
     x = this.config.boxSize - 1;
     for (y = this.config.boxSize - 2; y >= 0; y--) {
-        this.box.push(new Snake.Point(x, y));
+        position = new Snake.Point(x,y);
+        this.box.push(position);
     }
     // top
     y = this.config.boxSize - 1;
     for (x = 0; x < this.config.boxSize; x++) {
-        this.box.push(new Snake.Point(x, y));
+        position = new Snake.Point(x,y);
+        this.box.push(position);
     }
     // bottom
     y = 0;
     for (x = this.config.boxSize - 2; x > 0; x--) {
-        this.box.push(new Snake.Point(x, y));
+        position = new Snake.Point(x,y);
+        this.box.push(position);
     }
 };
 
@@ -130,41 +128,44 @@ Snake.Game.prototype.initSnake = function () {
     this.snake = [];
     // from head to tail
     for (let i = this.config.snakeLength; i > 0; i--) {
-        this.snake.push(new Snake.Point(x, i));
+        position = new Snake.Point(x,i);
+        this.snake.push(position);
     }
 };
 
-Snake.Game.prototype.calculateShift = function () {
+// To get the direction of the moving snake
+Snake.Game.prototype.shiftSnake = function () {
     var shift = new Snake.Point(0, 0);
     switch (this.state.direction) {
-        case Snake.Direction.Up:
-            shift.y = 1;
-            break;
-        case Snake.Direction.Down:
-            shift.y = -1;
-            break;
         case Snake.Direction.Left:
             shift.x = -1;
             break;
         case Snake.Direction.Right:
             shift.x = 1;
             break;
+        case Snake.Direction.Up:
+            shift.y = 1;
+            break;
+        case Snake.Direction.Down:
+            shift.y = -1;
+            break;
     }
     return shift;
 };
 
+// To move the snake
 Snake.Game.prototype.moveSnake = function () {
-    // Calculate new head
+    // Calculate the position for head
     var head = new Snake.Point(this.snake[0].x, this.snake[0].y),
-        shift = this.calculateShift();
-    head.x = head.x + shift.x;
-    head.y = head.y + shift.y;
+        shift = this.shiftSnake();
+    head.x += shift.x;
+    head.y += shift.y;
 
-    // Check if head collides with treat
-    if (head.collides([this.treat])) {
-        // Leave tail in place, as treat was eaten
-        // Give score, according to level
-        this.state.score = this.state.score + this.state.level;
+    // Whether the head collides (treat)
+    if (head.collide([this.treat])) {
+        // Calculate score
+        this.state.score += this.state.level;
+        // Remove treat
         const treatImgs = this.doc.getElementsByClassName('treat-img');
         if (treatImgs[0]) {
             treatImgs[0].remove();
@@ -172,25 +173,26 @@ Snake.Game.prototype.moveSnake = function () {
         this.drawTreat();
         delete this.treat;
     } else {
-        // Remove tail, as treat was not eaten
+        // Remove its tail
         this.snake.pop();
     }
 
-    // Check if head collides with box
-    if (head.collides(this.box)) {
+    // Whether the head collides (box)
+    if (head.collide(this.box)) {
         this.onGameOver();
     }
 
-    // Check if head collides with snake itself
-    if (head.collides(this.snake)) {
+    // Whether the head collides (snake)
+    if (head.collide(this.snake)) {
         this.onGameOver();
     }
 
-    // Set new head
+    // New head
     this.snake.unshift(head);
 
 };
 
+// Game over
 Snake.Game.prototype.onGameOver = function () {
     this.state.gameOver = true;
     initializeNewGameButton();
@@ -198,6 +200,7 @@ Snake.Game.prototype.onGameOver = function () {
     return;
 };
 
+// Check whether the current score is higher
 Snake.Game.prototype.updateHighestScore = function () {
     const currentScore = this.state.score;
     if (currentScore > highestScore) {
@@ -211,6 +214,7 @@ Snake.Game.prototype.getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+// Randomly placing a new treat
 Snake.Game.prototype.placeTreat = function () {
     if (this.state.ticks - this.state.lastTreatTick >= this.config.treatRepositionTicks) {
         delete this.treat;
@@ -224,13 +228,14 @@ Snake.Game.prototype.placeTreat = function () {
         x = this.getRandomInt(1, this.config.boxSize - 1);
         y = this.getRandomInt(1, this.config.boxSize - 1);
         treat = new Snake.Point(x, y);
-        if (!treat.collides(this.snake) && !treat.collides(this.box)) {
+        if (!treat.collide(this.snake) && !treat.collide(this.box)) {
             this.treat = treat;
             this.state.lastTreatTick = this.state.ticks;
         }
     }
 };
 
+// Update the states
 Snake.Game.prototype.update = function () {
     if (this.state.gameOver || this.state.paused) {
         return;
