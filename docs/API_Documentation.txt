@@ -1,0 +1,9 @@
+The API endpoints used by our user login system:
+
+1. Get all the registered users (HTTP method GET) at endpoint /app/users/all
+2. CREATE a new user (HTTP method POST) at endpoint /app/new/
+3. READ a single user (HTTP method GET) at endpoint /app/user/:user/:pass
+
+These are the CRUD API endpoints using express.js and better-sqlite3. The API works with the better-sqlite3 database to sign up new users or log in old users. 
+User information will be validated by the database. Only correct pair of user name and password can successfully log in to the system and start to play the game. 
+Otherwise, they are asked either to reenter the password or sign up for a new account.
